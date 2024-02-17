@@ -1,0 +1,40 @@
+site_name: 4geeks
+site_url: https://breathecode.herokuapp.com/
+
+repo_name: breatheco-de/celery-task-manager-django-plugin
+repo_url: https://github.com/breatheco-de/celery-task-manager-django-plugin
+edit_uri: ""
+
+theme:
+    name: 'material'
+    palette:
+      - scheme: 'default'
+        media: '(prefers-color-scheme: light)'
+        toggle:
+          icon: 'material/lightbulb'
+          name: "Switch to dark mode"
+      - scheme: 'slate'
+        media: '(prefers-color-scheme: dark)'
+        primary: 'blue'
+        toggle:
+          icon: 'material/lightbulb-outline'
+          name: 'Switch to light mode'
+    features:
+        - navigation.sections
+
+# this define the order of menu
+nav:
+    - "index.md"
+
+plugins:
+    - search
+
+markdown_extensions:
+    - pymdownx.highlight:
+          anchor_linenums: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+
+extra_css:
+    - css/custom.css

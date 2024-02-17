@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "linked-services"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.11"
+license = "LGPL-3.0-or-later"
+keywords = []
+authors = [{ name = "jefer94", email = "jdefreitaspinto@gmail.com" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "python-slugify",
+  "asgiref",
+  "pyjwt",
+  "cryptography",
+  "celery-task-manager",
+]
+
+[project.urls]
+Documentation = "https://github.com/breatheco-de/linked-services.py#readme"
+Issues = "https://github.com/breatheco-de/linked-services.py/issues"
+Source = "https://github.com/breatheco-de/linked-services.py"
+
+[tool.hatch.version]
+path = "src/linked_services/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+  "black",
+  "anyio[trio]",
+  "django",
+  "djangorestframework",
+  "requests",
+  "aiohttp",
+  "aiodns",
+  "httpx",
+  "httpcore",
+  "h11",
+  "idna",
+  "brotli",
+  "pyjwt",
+  "mkdocs",
+  "mkdocs-material",
+  "celery",
+  "celery-task-manager[django]>=1.0.0b6",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
+docs = "mkdocs serve --livereload"
+generate_docs = "mkdocs build"
+docs_deploy = "mkdocs gh-deploy -c"
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = ["mypy>=1.0.0"]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/linked_services tests}"
+
+[tool.coverage.run]
+source_pkgs = ["linked_services", "tests"]
+branch = true
+parallel = true
+omit = ["src/linked_services/__about__.py"]
+
+[tool.coverage.paths]
+linked_services = [
+  "src/linked_services",
+  "*/linked-services/src/linked_services",
+]
+tests = ["tests", "*/linked-services/tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[project.optional-dependencies]
+django = ["django", "djangorestframework", "celery-task-manager[django]"]
+requests = ["requests", "brotli"]
+aiohttp = ["aiohttp", "aiodns", "brotli"]
+httpx = ["httpx", "httpcore", "h11", "idna", "brotli"]
+
+[tool.black]
+line-length = 120
+
+[tool.flake8]
+max-line-length = 120
