@@ -1,8 +1,8 @@
-site_name: 4geeks
+site_name: linked-services
 site_url: https://breathecode.herokuapp.com/
 
-repo_name: breatheco-de/celery-task-manager-django-plugin
-repo_url: https://github.com/breatheco-de/celery-task-manager-django-plugin
+repo_name: breatheco-de/linked-services-django-plugin
+repo_url: https://github.com/breatheco-de/linked-services-django-plugin
 edit_uri: ""
 
 theme:

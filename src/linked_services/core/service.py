@@ -7,6 +7,8 @@ import aiohttp
 from asgiref.sync import sync_to_async
 from django.http import HttpResponse, StreamingHttpResponse
 
+from linked_services.core.settings import get_setting
+
 __all__ = ["Service"]
 
 LIBRARIES = {
@@ -582,8 +584,9 @@ class Service(SyncService, AsyncService):
             headers=headers,
         )
 
+        whoamy = get_setting("name")
         headers["Authorization"] = (
-            f"Signature App=4geeks," f"Nonce={sign}," f'SignedHeaders={";".join(headers.keys())},' f"Date={now}"
+            f"Signature App={whoamy}," f"Nonce={sign}," f'SignedHeaders={";".join(headers.keys())},' f"Date={now}"
         )
 
         return headers
@@ -595,7 +598,8 @@ class Service(SyncService, AsyncService):
 
         token = self._get_jwt(self.app, self.user_pk)
 
-        headers["Authorization"] = f"Link App=4geeks," f"Token={token}"
+        whoamy = get_setting("name")
+        headers["Authorization"] = f"Link App={whoamy}," f"Token={token}"
 
         return headers
 

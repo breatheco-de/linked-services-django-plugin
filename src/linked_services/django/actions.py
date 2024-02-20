@@ -19,6 +19,7 @@ from cryptography.hazmat.primitives.serialization import (
 from django.contrib.auth.models import User
 
 from linked_services.core.exceptions import ValidationException
+from linked_services.core.settings import get_setting
 from linked_services.django.models import App, FirstPartyWebhookLog
 
 JWT_LIFETIME = 10
@@ -28,12 +29,13 @@ def get_jwt(app: App, user_id: Optional[int] = None, reverse: bool = False):
     from datetime import datetime, timedelta
 
     now = datetime.utcnow()
+    whoamy = get_setting("name")
 
     # https://datatracker.ietf.org/doc/html/rfc7519#section-4
     payload = {
         "sub": user_id,
         "iss": os.getenv("API_URL", "http://localhost:8000"),
-        "app": "4geeks",
+        "app": whoamy,
         "aud": app.slug,
         "exp": datetime.timestamp(now + timedelta(minutes=JWT_LIFETIME)),
         "iat": datetime.timestamp(now) - 1,
@@ -42,7 +44,7 @@ def get_jwt(app: App, user_id: Optional[int] = None, reverse: bool = False):
 
     if reverse:
         payload["app"] = app.slug
-        payload["aud"] = "4geeks"
+        payload["aud"] = whoamy
 
     if app.algorithm == "HMAC_SHA256":
 
@@ -71,6 +73,7 @@ def get_signature(
     reverse: bool = False,
 ):
     now = datetime.utcnow().isoformat()
+    whoamy = get_setting("name")
 
     if headers is None:
         headers = {}
@@ -80,7 +83,7 @@ def get_signature(
 
     payload = {
         "timestamp": now,
-        "app": "4geeks",
+        "app": whoamy,
         "method": method.upper(),
         "params": params or {},
         "body": body,

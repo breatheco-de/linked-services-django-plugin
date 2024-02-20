@@ -13,6 +13,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from rest_framework.views import APIView
 
+from ..core.settings import get_setting
 from ..core.utils import AttrDict
 from .exceptions import ProgrammingError, ValidationException
 
@@ -122,7 +123,8 @@ def get_handlers(get_app_keys: GetAppKeysFn, get_user_scopes: GetUserScopesFn) -
 
         try:
             key = public_key if public_key else private_key
-            payload = jwt.decode(authorization["Token"], key, algorithms=[alg], audience="4geeks")
+            whoamy = get_setting("name")
+            payload = jwt.decode(authorization["Token"], key, algorithms=[alg], audience=whoamy)
 
         except Exception:
             if not legacy_key:

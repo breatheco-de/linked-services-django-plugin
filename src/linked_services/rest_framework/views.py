@@ -15,6 +15,7 @@ from rest_framework.response import Response
 
 from linked_services.core.actions import set_query_parameter
 from linked_services.core.i18n import translation
+from linked_services.core.settings import get_setting
 from linked_services.django.actions import aget_app
 from linked_services.django.models import (
     AppUserAgreement,
@@ -136,6 +137,7 @@ def authorize_view(
         )
 
         if request.method == "GET":
+            whoamy = get_setting("name")
             return render(
                 request,
                 "authorize.html",
@@ -145,7 +147,7 @@ def authorize_view(
                     "optional_scopes": optional_scopes,
                     "selected_scopes": selected_scopes,
                     "new_scopes": new_scopes,
-                    "reject_url": app.redirect_url + "?app=4geeks&status=rejected",
+                    "reject_url": app.redirect_url + f"?app={whoamy}&status=rejected",
                 },
             )
 
@@ -192,6 +194,7 @@ def authorize_view(
                     optional_scope_set=cache,
                 )
 
-            return redirect(app.redirect_url + "?app=4geeks&status=authorized")
+            whoamy = get_setting("name")
+            return redirect(app.redirect_url + f"?app={whoamy}&status=authorized")
 
     return wrapper
