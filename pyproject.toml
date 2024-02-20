@@ -56,6 +56,7 @@ dependencies = [
   "mkdocs-material",
   "celery",
   "celery-task-manager[django]>=1.0.0b6",
+  "adrf",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -91,7 +92,12 @@ tests = ["tests", "*/linked-services/tests"]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [project.optional-dependencies]
-django = ["django", "djangorestframework", "celery-task-manager[django]"]
+django = [
+  "django",
+  "djangorestframework",
+  "celery-task-manager[django]",
+  "adrf",
+]
 requests = ["requests", "brotli"]
 aiohttp = ["aiohttp", "aiodns", "brotli"]
 httpx = ["httpx", "httpcore", "h11", "idna", "brotli"]

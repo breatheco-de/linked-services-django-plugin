@@ -66,3 +66,11 @@ class ValidationException(APIException):
             return message
 
         return [self.detail]
+
+
+class ProgrammingError(Exception):
+    pass
+
+
+class MalformedLanguageCode(Exception):
+    pass

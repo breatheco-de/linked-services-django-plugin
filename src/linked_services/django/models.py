@@ -305,7 +305,7 @@ WEBHOOK_STATUSES = (
 
 
 class FirstPartyWebhookLog(models.Model):
-    """First party credentials for 4geeks, like Rigobot."""
+    """First party credentials."""
 
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="App that triggered or will receive the webhook")
 

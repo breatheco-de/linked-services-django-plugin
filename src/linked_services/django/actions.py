@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 from django.contrib.auth.models import User
 
-from linked_services.django.exceptions import ValidationException
+from linked_services.core.exceptions import ValidationException
 from linked_services.django.models import App, FirstPartyWebhookLog
 
 JWT_LIFETIME = 10
