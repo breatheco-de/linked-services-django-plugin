@@ -2,10 +2,10 @@ from typing import Any, Optional, Type
 
 from django.core.exceptions import SynchronousOnlyOperation
 
+from linked_services.core.exceptions import ValidationException
 from linked_services.core.service import AppNotFound
 from linked_services.core.service import Service as BaseService
 from linked_services.django.actions import get_app
-from linked_services.django.exceptions import ValidationException
 from linked_services.django.models import App
 
 has_sync = hasattr(BaseService, "__enter__")

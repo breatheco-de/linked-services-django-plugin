@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "linked_services.django.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "linked_services.settings")
     # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "task_manager.task_manager.settings")
     try:
         from django.core.management import execute_from_command_line

@@ -28,9 +28,13 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/breatheco-de/linked-services.py#readme"
-Issues = "https://github.com/breatheco-de/linked-services.py/issues"
-Source = "https://github.com/breatheco-de/linked-services.py"
+Documentation = "https://github.com/breatheco-de/linked-services-django-plugin#readme"
+Issues = "https://github.com/breatheco-de/linked-services-django-plugin/issues"
+Source = "https://github.com/breatheco-de/linked-services-django-plugin"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/linked_services"]
 
 [tool.hatch.version]
 path = "src/linked_services/__about__.py"

@@ -13,8 +13,9 @@ from django.http import HttpRequest
 from django.utils import timezone
 from rest_framework.views import APIView
 
-from ..core.settings import get_setting
-from ..core.utils import AttrDict
+from linked_services.core.settings import get_setting
+from linked_services.core.utils import AttrDict
+
 from .exceptions import ProgrammingError, ValidationException
 
 __all__ = ["get_handlers", "get_decorators"]

@@ -4,7 +4,7 @@ from typing import Optional
 from django.db.models import QuerySet
 from rest_framework.exceptions import APIException
 
-from ..core.shorteners import C
+from linked_services.core.shorteners import C
 
 __all__ = ["ValidationException", "APIException"]
 
