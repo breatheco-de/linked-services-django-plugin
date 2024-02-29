@@ -46,10 +46,10 @@ class Service(BaseService):
                 raise AppNotFound(f"App {self.app_pk} not found")
 
     def _get_app_cls(self) -> Type[App]:
-        raise App
+        return App
 
     def _get_app(self, pk: str | int) -> App:
-        raise get_app(pk)
+        return get_app(pk)
 
     def _get_signature(
         self,

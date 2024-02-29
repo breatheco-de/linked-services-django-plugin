@@ -43,6 +43,7 @@ path = "src/linked_services/__about__.py"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "pytest-django",
   "black",
   "anyio[trio]",
   "django",
@@ -61,10 +62,13 @@ dependencies = [
   "celery",
   "celery-task-manager[django]>=1.0.0b6",
   "adrf",
+  "faker",
+  "pytest-celery",
+  "celery[pytest]",
 ]
 [tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
+test = "pytest {args:tests} --nomigrations --durations=1"
+test-cov = "coverage run -m pytest {args:tests} --nomigrations --durations=1"
 cov-report = ["- coverage combine", "coverage report"]
 cov = ["test-cov", "cov-report"]
 docs = "mkdocs serve --livereload"
@@ -111,3 +115,19 @@ line-length = 120
 
 [tool.flake8]
 max-line-length = 120
+
+[tool.pytest.ini_options]
+django_debug_mode = true
+addopts = ["-p", "no:legacypath", "--tb=short"]
+DJANGO_SETTINGS_MODULE = "linked_services.settings"
+# python_files = ["breathecode/**/*.tests.py", "breathecode/**/*.tests_*.py"]
+
+# [tool.pytest]
+# env =
+#     ENV=test
+
+filterwarnings = [
+  # faker is passing a naive datetime to django
+  "ignore::RuntimeWarning:django.db.models.fields.*",
+  "ignore::DeprecationWarning:pkg_resources.*",
+]

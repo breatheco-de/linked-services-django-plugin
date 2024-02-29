@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import datetime, timedelta
 
 from django import forms
@@ -121,9 +122,12 @@ class App(models.Model):
         default=True, help_text="If true, the user will be required to accept an agreement"
     )
 
-    webhook_url = models.URLField()
-    redirect_url = models.URLField()
-    app_url = models.URLField()
+    users_path = models.CharField(
+        max_length=200, default="/v1/auth/app/user/", blank=True, help_text="URL path to consult the users"
+    )
+    webhook_url = models.URLField(help_text="URL to receive webhooks")
+    redirect_url = models.URLField(help_text="URL to redirect the user after the authorization")
+    app_url = models.URLField(help_text="URL to the app")
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
@@ -329,11 +333,15 @@ class FirstPartyWebhookLog(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def clean(self) -> None:
+        from linked_services.core.settings import get_setting
+
         if self.data and not isinstance(self.data, dict) and not isinstance(self.data, list):
             raise forms.ValidationError("Data must be a dictionary or a list")
 
-        if self.app.slug == "breathecode":
-            raise forms.ValidationError("You can't use breathecode as app")
+        app_name = get_setting("app_name")
+
+        if self.app and self.app.slug == app_name:
+            raise forms.ValidationError(f"You can't use {app_name} as app")
 
         if self.attempts < 0:
             raise forms.ValidationError("Attempts must be a positive integer")
@@ -350,3 +358,59 @@ class FirstPartyWebhookLog(models.Model):
         self.full_clean()
 
         super().save(*args, **kwargs)
+
+
+class FirstPartyCredentials(models.Model):
+    """First party credentials for 4geeks, like Rigobot."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="credentials")
+    app = models.JSONField(default=dict, blank=True, help_text="Credentials in each app")
+    health_status = models.JSONField(default=dict, blank=True, help_text="Health status of each credentials")
+
+    def clean(self) -> None:
+        from linked_services.core.settings import get_setting
+
+        if not isinstance(self.app, dict):
+            raise forms.ValidationError("App must be a dictionary")
+
+        apps = self.app.keys()
+        app_name = get_setting("app_name")
+        for app in apps:
+            t = type(self.app[app])
+            if app == app_name:
+                raise forms.ValidationError(f"You can't use {app_name} as app, app names must be unique")
+
+            if t not in [int, str, uuid.UUID]:
+                raise forms.ValidationError(
+                    f"app['{app}'] credential must be an integer, string or UUID, but got {t.__name__}"
+                )
+
+            if t is int and self.app[app] < 1:
+                raise forms.ValidationError(f"app['{app}'] credential must be a positive integer")
+
+        self._apps = apps
+
+        return super().clean()
+
+    def save(self, *args, **kwargs):
+        from linked_services.django import tasks
+
+        if not self.health_status:
+            self.health_status = {}
+
+        self.full_clean()
+
+        super().save(*args, **kwargs)
+
+        to_check = []
+
+        for app in self._apps:
+            if (
+                app not in self.health_status
+                or self.health_status[app]["id"] != self.app[app]
+                or self.health_status[app]["status"] != "HEALTHY"
+            ):
+                to_check.append(app)
+
+        if to_check:
+            tasks.check_credentials.delay(self.user.id, to_check)

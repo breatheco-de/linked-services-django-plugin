@@ -3,7 +3,6 @@ import hmac
 import os
 import secrets
 import urllib.parse
-from datetime import datetime
 from functools import lru_cache
 from typing import Optional
 
@@ -17,6 +16,7 @@ from cryptography.hazmat.primitives.serialization import (
     PublicFormat,
 )
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from linked_services.core.exceptions import ValidationException
 from linked_services.core.settings import get_setting
@@ -72,7 +72,7 @@ def get_signature(
     headers: Optional[dict] = None,
     reverse: bool = False,
 ):
-    now = datetime.utcnow().isoformat()
+    now = timezone.now().isoformat()
     whoamy = get_setting("name")
 
     if headers is None:
