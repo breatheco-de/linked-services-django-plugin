@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Any, Coroutine, Optional, Type
+from typing import Any, Callable, Coroutine, Optional, Type
 
 import aiohttp
 from asgiref.sync import sync_to_async
 from django.http import HttpResponse, StreamingHttpResponse
 
+from linked_services.core.exceptions import ValidationException
 from linked_services.core.settings import get_setting
 
 __all__ = ["Service"]
@@ -74,7 +75,13 @@ if LIBRARIES["requests"]:
         ) -> None:
             pass
 
-        def _sync_proxy(self, response: requests.Response, stream: bool) -> StreamingHttpResponse:
+        def _sync_proxy(self, request: Callable[[], requests.Response], stream: bool) -> StreamingHttpResponse:
+            try:
+                response = request()
+
+            except Exception as e:
+                raise ValidationException("Unexpected error: " + str(e), code=500, slug="unexpected-error")
+
             header_keys = [x for x in response.headers.keys() if x not in self.banned_keys]
 
             if stream:
@@ -103,90 +110,126 @@ if LIBRARIES["requests"]:
                 params = kwargs.pop("params", None)
 
             headers = self._authenticate("get", params=params, **kwargs)
-            res = requests.get(url, params=params, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.get(url, params=params, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_options(self, url, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("options", **kwargs)
-            res = requests.options(url, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.options(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_head(self, url, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("head", **kwargs)
-            res = requests.head(url, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.head(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_post(self, url, data=None, json=None, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("post", data=data, json=json, **kwargs)
-            res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_webhook(self, url, data=None, json=None, **kwargs):
             url = self.app.webhook_url
             headers = self._authenticate("post", data=data, json=json, **kwargs)
-            res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_put(self, url, data=None, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("put", data=data, **kwargs)
-            res = requests.put(url, data=data, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.put(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_patch(self, url, data=None, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("patch", data=data, **kwargs)
-            res = requests.patch(url, data=data, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.patch(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_delete(self, url, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate("delete", **kwargs)
-            res = requests.delete(url, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.delete(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
         def _sync_request(self, method, url, **kwargs):
             url = self.app.app_url + self._fix_url(url)
             headers = self._authenticate(method, **kwargs)
-            res = requests.request(method, url, **kwargs, headers=headers)
+
+            def request() -> requests.Response:
+                return requests.request(method, url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(request, kwargs.get("stream", False))
+
+            res = request()
 
             return res
 
@@ -225,7 +268,11 @@ if LIBRARIES["aiohttp"]:
 
         # django does not support StreamingHttpResponse with aiohttp due to django would have to close the response
         async def _async_proxy(self, response: Coroutine[Any, Any, ClientResponse]) -> HttpResponse:
-            r = await response
+            try:
+                r = await response
+
+            except Exception as e:
+                raise ValidationException("Unexpected error: " + str(e), code=500, slug="unexpected-error")
 
             header_keys = [x for x in r.headers.keys() if x not in self.banned_keys]
 
@@ -422,7 +469,7 @@ elif LIBRARIES["requests"]:
             res = requests.get(url, params=params, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -432,7 +479,7 @@ elif LIBRARIES["requests"]:
             res = requests.options(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -442,7 +489,7 @@ elif LIBRARIES["requests"]:
             res = requests.head(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -452,7 +499,7 @@ elif LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -462,7 +509,7 @@ elif LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -472,7 +519,7 @@ elif LIBRARIES["requests"]:
             res = requests.put(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -482,7 +529,7 @@ elif LIBRARIES["requests"]:
             res = requests.patch(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -492,7 +539,7 @@ elif LIBRARIES["requests"]:
             res = requests.delete(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -502,7 +549,7 @@ elif LIBRARIES["requests"]:
             res = requests.request(method, url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._sync_proxy(res, kwargs.get("stream", False))
+                return self._async_proxy(res, kwargs.get("stream", False))
 
             return res
 
