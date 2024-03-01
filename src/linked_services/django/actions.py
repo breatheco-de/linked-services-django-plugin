@@ -29,7 +29,7 @@ def get_jwt(app: App, user_id: Optional[int] = None, reverse: bool = False):
     from datetime import datetime, timedelta
 
     now = datetime.utcnow()
-    whoamy = get_setting("name")
+    whoamy = get_setting("app_name")
 
     # https://datatracker.ietf.org/doc/html/rfc7519#section-4
     payload = {
@@ -73,7 +73,7 @@ def get_signature(
     reverse: bool = False,
 ):
     now = timezone.now().isoformat()
-    whoamy = get_setting("name")
+    whoamy = get_setting("app_name")
 
     if headers is None:
         headers = {}

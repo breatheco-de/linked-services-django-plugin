@@ -124,7 +124,7 @@ def get_handlers(get_app_keys: GetAppKeysFn, get_user_scopes: GetUserScopesFn) -
 
         try:
             key = public_key if public_key else private_key
-            whoamy = get_setting("name")
+            whoamy = get_setting("app_name")
             payload = jwt.decode(authorization["Token"], key, algorithms=[alg], audience=whoamy)
 
         except Exception:

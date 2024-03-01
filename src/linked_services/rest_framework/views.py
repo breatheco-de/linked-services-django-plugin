@@ -137,7 +137,7 @@ def authorize_view(
         )
 
         if request.method == "GET":
-            whoamy = get_setting("name")
+            whoamy = get_setting("app_name")
             return render(
                 request,
                 "authorize.html",
@@ -194,7 +194,7 @@ def authorize_view(
                     optional_scope_set=cache,
                 )
 
-            whoamy = get_setting("name")
+            whoamy = get_setting("app_name")
             return redirect(app.redirect_url + f"?app={whoamy}&status=authorized")
 
     return wrapper

@@ -574,7 +574,7 @@ class Service(SyncService, AsyncService):
             headers=headers,
         )
 
-        whoamy = get_setting("name")
+        whoamy = get_setting("app_name")
         headers["Authorization"] = (
             f"Signature App={whoamy}," f"Nonce={sign}," f'SignedHeaders={";".join(headers.keys())},' f"Date={now}"
         )
@@ -588,7 +588,7 @@ class Service(SyncService, AsyncService):
 
         token = self._get_jwt(self.app, self.user_pk)
 
-        whoamy = get_setting("name")
+        whoamy = get_setting("app_name")
         headers["Authorization"] = f"Link App={whoamy}," f"Token={token}"
 
         return headers
