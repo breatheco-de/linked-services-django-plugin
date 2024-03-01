@@ -217,16 +217,11 @@ if LIBRARIES["aiohttp"]:
 
             return self
 
-        async def __aexit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType],
-        ):
+        async def __aexit__(self, *args, **kwargs) -> None:
             for obj in self.to_close:
-                await obj.__aexit__()
+                await obj.__aexit__(*args, **kwargs)
 
-            await self.session.__aexit__()
+            await self.session.__aexit__(*args, **kwargs)
 
         # django does not support StreamingHttpResponse with aiohttp due to django would have to close the response
         async def _async_proxy(self, response: Coroutine[Any, Any, ClientResponse]) -> HttpResponse:
@@ -392,12 +387,7 @@ elif LIBRARIES["requests"]:
 
             return self
 
-        async def __aexit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType],
-        ) -> None:
+        async def __aexit__(self, *args, **kwargs) -> None:
             pass
 
         def _async_proxy(self, response: requests.Response, stream: bool) -> StreamingHttpResponse:
