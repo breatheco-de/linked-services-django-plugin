@@ -284,7 +284,6 @@ if LIBRARIES["aiohttp"]:
 
         def _async_get(self, url, params=None, **kwargs):
             url = self.app.app_url + self._fix_url(url)
-            params = kwargs.pop("params", None)
             headers = self._authenticate("get", params=params, **kwargs)
 
             obj = self.session.get(url, params=params, **kwargs, headers=headers)
