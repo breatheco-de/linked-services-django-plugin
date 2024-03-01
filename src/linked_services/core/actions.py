@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 
-def set_query_parameter(url: str, **kwargs: str):
+def set_query_parameter(_url: str, **kwargs: str):
     """Given a URL, set or replace a query parameter and return the
     modified URL.
 
@@ -18,7 +18,7 @@ def set_query_parameter(url: str, **kwargs: str):
     'http://example.com?foo=stuff&biz=baz'
 
     """
-    scheme, netloc, path, query_string, fragment = urlsplit(url)
+    scheme, netloc, path, query_string, fragment = urlsplit(_url)
     query_params = parse_qs(query_string)
 
     for param_name, param_value in kwargs.items():
