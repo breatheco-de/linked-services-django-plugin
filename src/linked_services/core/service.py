@@ -106,7 +106,7 @@ if LIBRARIES["requests"]:
             res = requests.get(url, params=params, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -116,7 +116,7 @@ if LIBRARIES["requests"]:
             res = requests.options(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -126,7 +126,7 @@ if LIBRARIES["requests"]:
             res = requests.head(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -136,7 +136,7 @@ if LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -146,7 +146,7 @@ if LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -156,7 +156,7 @@ if LIBRARIES["requests"]:
             res = requests.put(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -166,7 +166,7 @@ if LIBRARIES["requests"]:
             res = requests.patch(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -176,7 +176,7 @@ if LIBRARIES["requests"]:
             res = requests.delete(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -186,7 +186,7 @@ if LIBRARIES["requests"]:
             res = requests.request(method, url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -247,7 +247,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -262,7 +262,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -277,7 +277,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -292,7 +292,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -307,7 +307,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -322,7 +322,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -337,7 +337,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -352,7 +352,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -367,7 +367,7 @@ if LIBRARIES["aiohttp"]:
 
             # wraps client response to be used within django views
             if self.proxy:
-                return self._aproxy(res)
+                return self._async_proxy(res)
 
             return res
 
@@ -422,7 +422,7 @@ elif LIBRARIES["requests"]:
             res = requests.get(url, params=params, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -432,7 +432,7 @@ elif LIBRARIES["requests"]:
             res = requests.options(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -442,7 +442,7 @@ elif LIBRARIES["requests"]:
             res = requests.head(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -452,7 +452,7 @@ elif LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -462,7 +462,7 @@ elif LIBRARIES["requests"]:
             res = requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -472,7 +472,7 @@ elif LIBRARIES["requests"]:
             res = requests.put(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -482,7 +482,7 @@ elif LIBRARIES["requests"]:
             res = requests.patch(url, data=data, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -492,7 +492,7 @@ elif LIBRARIES["requests"]:
             res = requests.delete(url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
@@ -502,7 +502,7 @@ elif LIBRARIES["requests"]:
             res = requests.request(method, url, **kwargs, headers=headers)
 
             if self.proxy:
-                return self._proxy(res, kwargs.get("stream", False))
+                return self._sync_proxy(res, kwargs.get("stream", False))
 
             return res
 
