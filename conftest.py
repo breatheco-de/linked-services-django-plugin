@@ -3,13 +3,14 @@ from __future__ import absolute_import, unicode_literals
 import functools
 
 # the rest of your Celery file contents go here
+import os
 import random
 import re
-from datetime import datetime
 from typing import Any, TypeVar
 
 # keeps this adobe
 import pytest
+from asgiref.sync import sync_to_async
 from celery import Celery
 from django.apps import apps
 from django.conf import settings
@@ -29,7 +30,7 @@ from tests.utils.argument_parser import argument_parser
 
 app = Celery(task_always_eager=True)
 
-
+NOT_PROVIDED = models.NOT_PROVIDED
 _fake = Faker()
 # pytest_plugins = ("celery.contrib.pytest",)
 
@@ -281,6 +282,9 @@ class DatabaseV2:
 
     @classmethod
     def create(cls, **models):
+
+        models = dict([(x, y) for x, y in models.items() if y])
+
         res = {}
         app_map, model_map, name_map, model_alias_map = cls._build_descriptors()
 
@@ -407,8 +411,8 @@ class DatabaseV2:
                                 exec_order.insert(model_index, dep_path)
 
                                 # disable m2m temporally
-                                if field_attrs["cls"] is not ManyToManyDescriptor:
-                                    to_re_reevaluate.append(dep_path)
+                                # if field_attrs["cls"] is not ManyToManyDescriptor:
+                                to_re_reevaluate.append(dep_path)
 
                     to_reevaluate = to_re_reevaluate
 
@@ -418,24 +422,41 @@ class DatabaseV2:
         for model_path in exec_order:
             model_descriptor, value = cache[model_path]
 
-            how_many, arguments = argument_parser(value)[0]
+            result = []
 
-            for related_field, field_type, field_attrs in model_descriptor["related_fields"]:
-                if field_attrs["path"] in generated:
+            for how_many, arguments in argument_parser(value):
+                m2m = {}
+                for related_field, field_type, field_attrs in model_descriptor["related_fields"]:
+                    if field_attrs["path"] in generated:
 
-                    # no implemented yet
-                    if field_type is ManyToManyDescriptor:
-                        continue
-                        # arguments[field_attrs["name"]] = [generated[field_attrs["path"]]]
+                        # no implemented yet
+                        if field_type is ManyToManyDescriptor:
+                            if isinstance(value, dict):
 
-                    # else:
+                                if field_attrs["name"] in value:
+                                    m2m[field_attrs["name"]] = value.pop(field_attrs["name"])
+                            # , generated[field_attrs["path"]]
+                            continue
+                            # arguments[field_attrs["name"]] = [generated[field_attrs["path"]]]
 
-                    arguments[field_attrs["name"]] = generated[field_attrs["path"]]
+                        # else:
 
-            result = [
-                model_descriptor["cls"].objects.create(**{**model_descriptor["get_values"](), **arguments})
-                for _ in range(how_many)
-            ]
+                        x = generated[field_attrs["path"]]
+                        if isinstance(x, list):
+                            x = x[0]
+
+                        arguments[field_attrs["name"]] = x
+
+                samples = [
+                    model_descriptor["cls"].objects.create(**{**model_descriptor["get_values"](), **arguments})
+                    for _ in range(how_many)
+                ]
+
+                result += samples
+
+                for sample in samples:
+                    for key, value in m2m.items():
+                        getattr(sample, key).set(value)
 
             if len(result) == 1:
                 result = result[0]
@@ -458,6 +479,11 @@ class Database:
     @classmethod
     def create(cls, **models):
         return DatabaseV2.create(**models)
+
+    @classmethod
+    @sync_to_async
+    def acreate(cls, **models):
+        return cls.create(**models)
 
     @classmethod
     def get_model(cls, path: str) -> Model:
@@ -492,6 +518,33 @@ class Database:
         return cls._cache[path]
 
     @classmethod
+    @sync_to_async
+    def aget_model(cls, path: str) -> Model:
+        """
+        Return the model matching the given app_label and model_name.
+
+        As a shortcut, app_label may be in the form <app_label>.<model_name>.
+
+        model_name is case-insensitive.
+
+        Raise LookupError if no application exists with this label, or no
+        model exists with this name in the application. Raise ValueError if
+        called with a single argument that doesn't contain exactly one dot.
+
+        Usage:
+
+        ```py
+        # class breathecode.admissions.models.Cohort
+        Cohort = self.bc.database.get_model('admissions.Cohort')
+        ```
+
+        Keywords arguments:
+        - path(`str`): path to a model, for example `admissions.CohortUser`.
+        """
+
+        return cls.get_model(path)
+
+    @classmethod
     def list_of(cls, path: str, dict: bool = True) -> list[Model | dict[str, Any]]:
         """
         This is a wrapper for `Model.objects.filter()`, get a list of values of models as `list[dict]` if
@@ -519,6 +572,30 @@ class Database:
             result = [_remove_dinamics_fields(data.__dict__) for data in result]
 
         return result
+
+    @classmethod
+    @sync_to_async
+    def alist_of(cls, path: str, dict: bool = True) -> list[Model | dict[str, Any]]:
+        """
+        This is a wrapper for `Model.objects.filter()`, get a list of values of models as `list[dict]` if
+        `dict=True` else get a list of `Model` instances.
+
+        Usage:
+
+        ```py
+        # get all the Cohort as list of dict
+        self.bc.database.get('admissions.Cohort')
+
+        # get all the Cohort as list of instances of model
+        self.bc.database.get('admissions.Cohort', dict=False)
+        ```
+
+        Keywords arguments:
+        - path(`str`): path to a model, for example `admissions.CohortUser`.
+        - dict(`bool`): if true return dict of values of model else return model instance.
+        """
+
+        return cls.list_of(path, dict)
 
 
 @pytest.fixture
@@ -609,3 +686,18 @@ def set_datetime(monkeypatch):
         monkeypatch.setattr(_fake, "date_time", lambda: new_datetime)
 
     yield patch
+
+
+@pytest.fixture
+def set_env():
+    old_env = {}
+
+    def patch(**environments: str):
+        for env_name in environments:
+            old_env[env_name] = os.getenv(env_name, "")
+            os.environ[env_name] = environments[env_name]
+
+    yield patch
+
+    for env_name in old_env:
+        os.environ[env_name] = old_env[env_name]

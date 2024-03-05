@@ -65,9 +65,10 @@ dependencies = [
   "faker",
   "pytest-celery",
   "celery[pytest]",
+  "pytest-asyncio",
 ]
 [tool.hatch.envs.default.scripts]
-test = "pytest {args:tests} --nomigrations --durations=1"
+test = "pytest {args:tests} --nomigrations --durations=1 --create-db"
 test-cov = "coverage run -m pytest {args:tests} --nomigrations --durations=1"
 cov-report = ["- coverage combine", "coverage report"]
 cov = ["test-cov", "cov-report"]

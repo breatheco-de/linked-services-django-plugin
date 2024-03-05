@@ -2,8 +2,10 @@ import asyncio
 import base64
 import logging
 import os
+from typing import Callable, Optional
 
 from adrf.decorators import api_view
+from asgiref.sync import sync_to_async
 from django.db.models import Q
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
@@ -71,15 +73,42 @@ async def app_webhook(request, app: dict, token: dict):
 
 
 def authorize_view(
-    login_url: str = os.getenv("LOGIN_URL"), app_url: str = os.getenv("APP_URL"), get_language=lambda request: "en"
+    login_url: Optional[str] = None,
+    app_url: Optional[str] = None,
+    get_language: Optional[Callable[[HttpRequest], str]] = None,
 ):
+    non_valid_envs = []
+    if login_url is None:
+        login_url = os.getenv("LOGIN_URL")
+
+    if app_url is None:
+        app_url = os.getenv("APP_URL")
+
+    if login_url is None:
+        non_valid_envs.append("LOGIN_URL")
+
+    if app_url is None:
+        non_valid_envs.append("APP_URL")
+
+    if non_valid_envs:
+        raise Exception(f"Missing environment variables: {', '.join(non_valid_envs)}")
+
+    if get_language is None:
+
+        def get_language(request: HttpRequest) -> str:
+            return "en"
+
+    @sync_to_async
+    def aget_user(request: HttpRequest):
+        return request.user
 
     @api_view(["GET", "POST"])
     @permission_classes([AllowAny])
     async def wrapper(request: HttpRequest, app_slug=None):
-        user = await request.auser()
+        user = await aget_user(request)
 
         if user.is_anonymous:
+
             # base64 encode
             forward = str(base64.b64encode(request.get_full_path().encode("utf-8")), "utf-8")
             url = set_query_parameter(login_url, url=forward)
@@ -93,7 +122,7 @@ def authorize_view(
         except Exception:
             return render(
                 request,
-                "app_not_found.html",
+                "app-not-found.html",
                 {
                     "app_url": app_url,
                     "title": translation(lang, en="Not found", es="No encontrado"),
@@ -106,7 +135,7 @@ def authorize_view(
         if not app.require_an_agreement:
             return render(
                 request,
-                "app_not_found.html",
+                "app-not-found.html",
                 {
                     "app_url": app_url,
                     "title": translation(lang, en="Not found", es="No encontrado"),
@@ -116,9 +145,13 @@ def authorize_view(
                 status=404,
             )
 
-        agreement = await AppUserAgreement.objects.filter(app=app, user=request.user).afirst()
+        agreement = (
+            await AppUserAgreement.objects.filter(app=app, user=request.user)
+            .select_related("optional_scope_set")
+            .afirst()
+        )
         selected_scopes = (
-            [x.slug async for x in agreement.optional_scope_set.optional_scopes.all()] if agreement else []
+            [x.slug async for x in agreement.optional_scope_set.optional_scopes.filter()] if agreement else []
         )
 
         required_scopes = [x async for x in Scope.objects.filter(m2m_required_scopes__app=app)]
@@ -128,13 +161,15 @@ def authorize_view(
             [
                 x.slug
                 async for x in Scope.objects.filter(
-                    Q(m2m_required_scopes__app=app, m2m_required_scopes__agreed_at__gt=agreement.agreed_at),
-                    Q(m2m_optional_scopes__app=app, m2m_optional_scopes__agreed_at__gt=agreement.agreed_at),
+                    Q(m2m_required_scopes__app=app, m2m_required_scopes__agreed_at__gt=agreement.agreed_at)
+                    | Q(m2m_optional_scopes__app=app, m2m_optional_scopes__agreed_at__gt=agreement.agreed_at),
                 )
             ]
             if agreement
             else []
         )
+
+        whoamy = get_setting("app_name")
 
         if request.method == "GET":
             whoamy = get_setting("app_name")
@@ -169,7 +204,7 @@ def authorize_view(
             cache = await OptionalScopeSet.objects.filter(query).afirst()
             if cache is None or await cache.optional_scopes.acount() != len(items):
                 cache = OptionalScopeSet()
-                cache.save()
+                await cache.asave()
 
                 created = True
 
@@ -186,9 +221,10 @@ def authorize_view(
                 await agreement.asave()
 
             else:
+                user = await aget_user(request)
                 agreement = await AppUserAgreement.objects.acreate(
                     app=app,
-                    user=request.user,
+                    user=user,
                     agreed_at=timezone.now(),
                     agreement_version=app.agreement_version,
                     optional_scope_set=cache,

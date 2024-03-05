@@ -200,7 +200,11 @@ class AppRequiredScope(models.Model):
     agreed_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
-        return f"{self.app.name} ({self.app.slug}) -> {self.scope.name} ({self.scope.slug})"
+        try:
+            return f"{self.app.name} ({self.app.slug}) -> {self.scope.name} ({self.scope.slug})"
+
+        except Exception:
+            return self.pk
 
 
 class AppOptionalScope(models.Model):
@@ -209,7 +213,11 @@ class AppOptionalScope(models.Model):
     agreed_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
-        return f"{self.app.name} ({self.app.slug}) -> {self.scope.name} ({self.scope.slug})"
+        try:
+            return f"{self.app.name} ({self.app.slug}) -> {self.scope.name} ({self.scope.slug})"
+
+        except Exception:
+            return self.pk
 
 
 class OptionalScopeSet(models.Model):
