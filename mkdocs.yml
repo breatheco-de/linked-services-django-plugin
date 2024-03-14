@@ -1,4 +1,4 @@
-site_name: linked-services
+site_name: Linked Services
 site_url: https://breathecode.herokuapp.com/
 
 repo_name: breatheco-de/linked-services-django-plugin
@@ -24,7 +24,20 @@ theme:
 
 # this define the order of menu
 nav:
-    - "index.md"
+    - index.md
+    - Getting started:
+      - "getting-started/installation.md"
+      - "getting-started/set-up.md"
+      - "getting-started/services.md"
+      - "getting-started/scopes.md"
+      - "getting-started/views.md"
+
+    - Extending service:
+      - "extending-service/rest-frameworks.md"
+      - "extending-service/http-clients.md"
+
+    - Extending scope and ascope:
+      - "extending-scope/rest-frameworks.md"
 
 plugins:
     - search

@@ -7,17 +7,22 @@ name = "linked-services"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = "LGPL-3.0-or-later"
 keywords = []
 authors = [{ name = "jefer94", email = "jdefreitaspinto@gmail.com" }]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+  "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
   "python-slugify",
@@ -28,7 +33,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/breatheco-de/linked-services-django-plugin#readme"
+Documentation = "https://breatheco-de.github.io/linked-services-django-plugin/"
 Issues = "https://github.com/breatheco-de/linked-services-django-plugin/issues"
 Source = "https://github.com/breatheco-de/linked-services-django-plugin"
 
