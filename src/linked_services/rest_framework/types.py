@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.http.request import HttpRequest as BaseHttpRequest
 
 
-class AsyncRequest(BaseAsyncRequest):
+class AsyncLinkedHttpRequest(BaseAsyncRequest):
     def __init__(self, *args, **kwargs):
         raise Exception("This AsyncRequest class cannot be instantiated, you must use adrf.requests.AsyncRequest")
 
@@ -11,7 +11,7 @@ class AsyncRequest(BaseAsyncRequest):
         pass
 
 
-class HttpRequest(BaseHttpRequest):
+class LinkedHttpRequest(BaseHttpRequest):
     def __init__(self, *args, **kwargs):
         raise Exception("This AsyncRequest class cannot be instantiated, you must use django.http.request.HttpRequest")
 
