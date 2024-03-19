@@ -335,7 +335,7 @@ def create_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User 
 
     with Service(app) as s:
         url = s.app.users_path
-        if url.endswith(url, "/"):
+        if url[-1] == "/":
             url += str(sub)
 
         else:
@@ -351,14 +351,26 @@ def create_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User 
         optional_fields = ["first_name", "last_name"]
         mandatory_attrs = {}
         optional_attrs = {}
+        errors = []
 
-        id = data.get("id")
+        if "id" not in data:
+            errors.append("id not provided")
+
+        else:
+            id = data.get("id")
 
         for field in mandatory_fields:
-            mandatory_attrs[field] = data.get(field)
+            if field in data:
+                mandatory_attrs[field] = data.get(field)
+
+            else:
+                errors.append(f"{field} not provided")
 
         for field in optional_fields:
-            optional_attrs[field] = data.get(field)
+            optional_attrs[field] = data.get(field, "")
+
+        if errors:
+            raise ValidationException(", ".join(errors), slug="missing-required-fields")
 
         user, created = User.objects.get_or_create(**mandatory_attrs, defaults=optional_attrs)
         if created:
@@ -388,7 +400,7 @@ async def acreate_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -
 
     async with Service(app) as s:
         url = s.app.users_path
-        if url.endswith(url, "/"):
+        if url[-1] == "/":
             url += str(sub)
 
         else:
@@ -404,14 +416,26 @@ async def acreate_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -
         optional_fields = ["first_name", "last_name"]
         mandatory_attrs = {}
         optional_attrs = {}
+        errors = []
 
-        id = data.get("id")
+        if "id" not in data:
+            errors.append("id not provided")
+
+        else:
+            id = data.get("id")
 
         for field in mandatory_fields:
-            mandatory_attrs[field] = data.get(field)
+            if field in data:
+                mandatory_attrs[field] = data.get(field)
+
+            else:
+                errors.append(f"{field} not provided")
 
         for field in optional_fields:
-            optional_attrs[field] = data.get(field)
+            optional_attrs[field] = data.get(field, "")
+
+        if errors:
+            raise ValidationException(", ".join(errors), slug="missing-required-fields")
 
         user, created = await User.objects.aget_or_create(**mandatory_attrs, defaults=optional_attrs)
         if created:
