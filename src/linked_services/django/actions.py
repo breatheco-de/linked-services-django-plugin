@@ -334,27 +334,31 @@ def create_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User 
     from linked_services.django.service import Service
 
     with Service(app) as s:
-        response = s.get(s.app.users_path, params={"id": sub})
+        url = s.app.users_path
+        if url.endswith(url, "/"):
+            url += str(sub)
+
+        else:
+            url += f"/{sub}"
+
+        response = s.get(url)
 
         if response.status_code >= 300:
             return None
 
         data = response.json()
-        if len(data) == 0:
-            return None
-
         mandatory_fields = ["username", "email"]
         optional_fields = ["first_name", "last_name"]
         mandatory_attrs = {}
         optional_attrs = {}
 
-        id = data[0].get("id")
+        id = data.get("id")
 
         for field in mandatory_fields:
-            mandatory_attrs[field] = data[0].get(field)
+            mandatory_attrs[field] = data.get(field)
 
         for field in optional_fields:
-            optional_attrs[field] = data[0].get(field)
+            optional_attrs[field] = data.get(field)
 
         user, created = User.objects.get_or_create(**mandatory_attrs, defaults=optional_attrs)
         if created:
@@ -383,27 +387,31 @@ async def acreate_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -
     from linked_services.django.service import Service
 
     async with Service(app) as s:
-        response = await s.get(s.app.users_path, params={"id": sub})
+        url = s.app.users_path
+        if url.endswith(url, "/"):
+            url += str(sub)
+
+        else:
+            url += f"/{sub}"
+
+        response = await s.get(url)
 
         if response.status_code >= 300:
             return None
 
         data = await response.json()
-        if len(data) == 0:
-            return None
-
         mandatory_fields = ["username", "email"]
         optional_fields = ["first_name", "last_name"]
         mandatory_attrs = {}
         optional_attrs = {}
 
-        id = data[0].get("id")
+        id = data.get("id")
 
         for field in mandatory_fields:
-            mandatory_attrs[field] = data[0].get(field)
+            mandatory_attrs[field] = data.get(field)
 
         for field in optional_fields:
-            optional_attrs[field] = data[0].get(field)
+            optional_attrs[field] = data.get(field)
 
         user, created = await User.objects.aget_or_create(**mandatory_attrs, defaults=optional_attrs)
         if created:
