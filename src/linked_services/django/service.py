@@ -13,6 +13,8 @@ has_async = hasattr(BaseService, "__aenter__")
 
 
 class Service(BaseService):
+    app: App
+
     if has_sync:
 
         def __enter__(self) -> "Service":

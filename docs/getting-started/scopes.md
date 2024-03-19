@@ -16,6 +16,10 @@
 
 I would recommend your that you would use the following naming convention, `action_name:data_name` like `read:repo` or `data_name` like `repo`.
 
+## Get a user
+
+`scope` and `ascope` inject a function called `get_user`, it's a synchronous implementation in `scope` and an asynchronous implementation in `ascope`. `get_user` returns a user object or none if does not exist an user in this app and in the related application.
+
 ## Examples
 
 ### Sync
@@ -40,10 +44,11 @@ class AppUserView(APIView):
             extra['appuseragreement__app__id'] = app.id
 
         if token.sub:
-            extra['id'] = token.sub
+            user = request.get_user()
+            extra['id'] = user.id
 
         if user_id:
-            if token.sub and token.sub != user_id:
+            if 'id' in extra and extra['id'] != user_id:
                 raise ValidationException('This user does not have access to this resource',
                                           code=403,
                                           slug='user-with-no-access',

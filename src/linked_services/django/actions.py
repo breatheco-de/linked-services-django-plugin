@@ -3,6 +3,7 @@ import hmac
 import os
 import secrets
 import urllib.parse
+import uuid
 from functools import lru_cache
 from typing import Optional
 
@@ -20,7 +21,11 @@ from django.utils import timezone
 
 from linked_services.core.exceptions import ValidationException
 from linked_services.core.settings import get_setting
-from linked_services.django.models import App, FirstPartyWebhookLog
+from linked_services.django.models import (
+    App,
+    FirstPartyCredentials,
+    FirstPartyWebhookLog,
+)
 
 JWT_LIFETIME = 10
 
@@ -305,3 +310,119 @@ async def send_webhook(
     # this will keep PENDING in the future
     x.status = "DONE"
     x.save()
+
+
+def get_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User | None:
+    credentials = FirstPartyCredentials.objects.filter(**{f"app__{app}": sub}).select_related("user").first()
+
+    if credentials:
+        return credentials.user
+
+    return create_user(app, sub)
+
+
+async def aget_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User | None:
+    credentials = await FirstPartyCredentials.objects.filter(**{f"app__{app}": sub}).select_related("user").afirst()
+
+    if credentials:
+        return credentials.user
+
+    return await acreate_user(app, sub)
+
+
+def create_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User | None:
+    from linked_services.django.service import Service
+
+    with Service(app) as s:
+        response = s.get(s.app.users_path, params={"id": sub})
+
+        if response.status_code >= 300:
+            return None
+
+        data = response.json()
+        if len(data) == 0:
+            return None
+
+        mandatory_fields = ["username", "email"]
+        optional_fields = ["first_name", "last_name"]
+        mandatory_attrs = {}
+        optional_attrs = {}
+
+        id = data[0].get("id")
+
+        for field in mandatory_fields:
+            mandatory_attrs[field] = data[0].get(field)
+
+        for field in optional_fields:
+            optional_attrs[field] = data[0].get(field)
+
+        user, created = User.objects.get_or_create(**mandatory_attrs, defaults=optional_attrs)
+        if created:
+            for field in optional_fields:
+                setattr(user, field, optional_attrs[field])
+
+            user.save()
+
+        credentials, created = FirstPartyCredentials.objects.get_or_create(
+            user=user,
+            defaults={
+                "app": {
+                    s.app.slug: id,
+                },
+            },
+        )
+
+        if created is False:
+            credentials.app[s.app.slug] = id
+            credentials.save()
+
+        return user
+
+
+async def acreate_user(app: str | int | uuid.UUID, sub: str | int | uuid.UUID) -> User | None:
+    from linked_services.django.service import Service
+
+    async with Service(app) as s:
+        response = await s.get(s.app.users_path, params={"id": sub})
+
+        if response.status_code >= 300:
+            return None
+
+        data = await response.json()
+        if len(data) == 0:
+            return None
+
+        mandatory_fields = ["username", "email"]
+        optional_fields = ["first_name", "last_name"]
+        mandatory_attrs = {}
+        optional_attrs = {}
+
+        id = data[0].get("id")
+
+        for field in mandatory_fields:
+            mandatory_attrs[field] = data[0].get(field)
+
+        for field in optional_fields:
+            optional_attrs[field] = data[0].get(field)
+
+        user, created = await User.objects.aget_or_create(**mandatory_attrs, defaults=optional_attrs)
+        if created:
+            for field in optional_fields:
+                setattr(user, field, optional_attrs[field])
+
+            await user.asave()
+
+        credentials, created = await FirstPartyCredentials.objects.aget_or_create(
+            user=user,
+            defaults={
+                "app": {
+                    s.app.slug: id,
+                },
+            },
+        )
+
+        if created is False:
+            credentials.app[s.app.slug] = id
+            await credentials.asave()
+
+        return user

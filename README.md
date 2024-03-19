@@ -7,6 +7,7 @@
 
 **Table of Contents**
 
+- [What does this](#what-does-this)
 - [Installation](#installation)
 - [License](#license)
 

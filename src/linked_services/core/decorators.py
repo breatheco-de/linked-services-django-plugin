@@ -4,8 +4,9 @@ import hashlib
 import hmac
 import logging
 import urllib.parse
+import uuid
 from datetime import datetime, timedelta
-from typing import Any, Callable, Optional, TypedDict
+from typing import Any, Callable, Coroutine, Optional, TypedDict
 
 import jwt
 from asgiref.sync import sync_to_async
@@ -54,6 +55,8 @@ Key = tuple[bytes, bytes]
 
 GetUserScopesFn = Callable[[str, int], tuple[list[str], list[str]]]
 GetAppKeysFn = Callable[[str], tuple[Info, Key, Optional[Key]]]
+GetUserFn = Callable[[int | str | uuid.UUID, int | str | uuid.UUID], Any | None]
+AGetUserFn = Callable[[int | str | uuid.UUID, int | str | uuid.UUID], Coroutine[Any | None, None, None]]
 
 
 class Token(TypedDict):
@@ -264,7 +267,9 @@ def get_handlers(get_app_keys: GetAppKeysFn, get_user_scopes: GetUserScopesFn) -
     return link_schema, signature_schema
 
 
-def get_decorators(link_schema: LinkSchemaFn, signature_schema: SignatureSchemaFn) -> tuple[Callable, Callable]:
+def get_decorators(
+    link_schema: LinkSchemaFn, signature_schema: SignatureSchemaFn, get_user: GetUserFn, aget_user: AGetUserFn
+) -> tuple[Callable, Callable]:
     def scope(scopes: Optional[list] = None, mode: Optional[str] = None) -> callable:
         """Check if the app has access to the scope provided."""
 
@@ -303,6 +308,10 @@ def get_decorators(link_schema: LinkSchemaFn, signature_schema: SignatureSchemaF
                 if authorization.startswith("Link ") and mode != "signature":
                     authorization = authorization.replace("Link ", "")
                     app, token = link_schema(request, scopes, authorization, mode == "signature")
+
+                    cu = functools.partial(get_user, token["app"], token["sub"])
+                    setattr(request, "get_user", cu)
+
                     return function(*args, **kwargs, token=AttrDict(**token), app=AttrDict(**app))
 
                 elif authorization.startswith("Signature ") and mode != "jwt":
@@ -357,6 +366,10 @@ def get_decorators(link_schema: LinkSchemaFn, signature_schema: SignatureSchemaF
                 if authorization.startswith("Link ") and mode != "signature":
                     authorization = authorization.replace("Link ", "")
                     app, token = await sync_to_async(link_schema)(request, scopes, authorization, mode == "signature")
+
+                    cu = functools.partial(get_user, token["app"], token["sub"])
+                    setattr(request, "aget_user", cu)
+
                     return await function(*args, **kwargs, token=AttrDict(**token), app=AttrDict(**app))
 
                 elif authorization.startswith("Signature ") and mode != "jwt":
