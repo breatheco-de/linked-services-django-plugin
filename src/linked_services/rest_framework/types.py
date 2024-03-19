@@ -13,7 +13,7 @@ class AsyncRequest(BaseAsyncRequest):
 
 class HttpRequest(BaseHttpRequest):
     def __init__(self, *args, **kwargs):
-        raise Exception("This AsyncRequest class cannot be instantiated, you must use adrf.requests.AsyncRequest")
+        raise Exception("This AsyncRequest class cannot be instantiated, you must use django.http.request.HttpRequest")
 
     def get_user() -> User | None:
         pass
