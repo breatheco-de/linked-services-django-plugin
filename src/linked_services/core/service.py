@@ -14,7 +14,6 @@ from linked_services.core.settings import get_setting
 
 __all__ = ["Service"]
 
-logger = logging.getLogger(__name__)
 DEBUG = os.getenv("LOG_LEVEL") == "DEBUG"
 
 LIBRARIES = {
@@ -100,10 +99,11 @@ if LIBRARIES["requests"]:
                     resource[header] = response.headers[header]
 
                 if DEBUG:
-                    logger.debug("Response")
-                    logger.debug("  Content: no visible due to it's a stream")
-                    logger.debug("  Headers: " + str(response.headers))
-                    logger.debug("  Status code: " + str(response.status_code))
+                    print("Response")
+                    print("  Content: no visible due to it's a stream")
+                    print("  Headers: " + str(response.headers))
+                    print("  Status code: " + str(response.status_code))
+                    print("")
 
                 return resource
 
@@ -113,11 +113,12 @@ if LIBRARIES["requests"]:
                 headers[header] = response.headers[header]
 
             if DEBUG:
-                logger.debug("Response")
-                logger.debug("  Type: Proxy")
-                logger.debug("  Content: " + response.content.decode())
-                logger.debug("  Headers: " + str(headers))
-                logger.debug("  Status code: " + str(response.status_code))
+                print("Response")
+                print("  Type: Proxy")
+                print("  Content: " + response.content.decode())
+                print("  Headers: " + str(headers))
+                print("  Status code: " + str(response.status_code))
+                print("")
 
             return HttpResponse(response.content, status=response.status_code, headers=headers)
 
@@ -131,10 +132,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: GET")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: GET")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.get(url, params=params, **kwargs, headers=headers)
 
@@ -151,10 +152,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: OPTIONS")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: OPTIONS")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.options(url, **kwargs, headers=headers)
 
@@ -171,10 +172,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: HEAD")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: HEAD")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.head(url, **kwargs, headers=headers)
 
@@ -191,10 +192,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: POST")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: POST")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
@@ -211,10 +212,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Type: Webhook")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Type: Webhook")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.post(url, data=data, json=json, **kwargs, headers=headers)
 
@@ -231,10 +232,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: PUT")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: PUT")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.put(url, data=data, **kwargs, headers=headers)
 
@@ -251,10 +252,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: PATCH")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: PATCH")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.patch(url, data=data, **kwargs, headers=headers)
 
@@ -271,10 +272,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: DELETE")
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: DELETE")
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.delete(url, **kwargs, headers=headers)
 
@@ -291,10 +292,10 @@ if LIBRARIES["requests"]:
 
             def request() -> requests.Response:
                 if DEBUG:
-                    logger.debug("Request")
-                    logger.debug("  Method: " + str(method).upper())
-                    logger.debug("  Url: " + str(url))
-                    logger.debug("")
+                    print("Request")
+                    print("  Method: " + str(method).upper())
+                    print("  Url: " + str(url))
+                    print("")
 
                 return requests.request(method, url, **kwargs, headers=headers)
 
@@ -364,11 +365,12 @@ if LIBRARIES["aiohttp"]:
             content = await r.content.read()
 
             if DEBUG:
-                logger.debug("Response")
-                logger.debug("  Type: Proxy")
-                logger.debug("  Content: " + content.decode())
-                logger.debug("  Headers: " + str(headers))
-                logger.debug("  Status code: " + str(response.status_code))
+                print("Response")
+                print("  Type: Proxy")
+                print("  Content: " + content.decode())
+                print("  Headers: " + str(headers))
+                print("  Status code: " + str(r.status))
+                print("")
 
             return HttpResponse(content, status=r.status, headers=headers)
 
@@ -382,10 +384,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: GET")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: GET")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -403,10 +405,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: OPTIONS")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: OPTIONS")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -424,10 +426,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: HEAD")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: HEAD")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -445,10 +447,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: POST")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: POST")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -466,10 +468,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Type: Webhook")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Type: Webhook")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -487,10 +489,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: PUT")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: PUT")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -508,10 +510,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: PATCH")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: PATCH")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -529,10 +531,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: DELETE")
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: DELETE")
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -550,10 +552,10 @@ if LIBRARIES["aiohttp"]:
             res = obj.__aenter__()
 
             if DEBUG:
-                logger.debug("Request")
-                logger.debug("  Method: " + str(method).upper())
-                logger.debug("  Url: " + str(url))
-                logger.debug("")
+                print("Request")
+                print("  Method: " + str(method).upper())
+                print("  Url: " + str(url))
+                print("")
 
             # wraps client response to be used within django views
             if self.proxy:
@@ -594,10 +596,11 @@ elif LIBRARIES["requests"]:
                     resource[header] = response.headers[header]
 
                 if DEBUG:
-                    logger.debug("Response")
-                    logger.debug("  Content: no visible due to it's a stream")
-                    logger.debug("  Headers: " + str(response.headers))
-                    logger.debug("  Status code: " + str(response.status_code))
+                    print("Response")
+                    print("  Content: no visible due to it's a stream")
+                    print("  Headers: " + str(response.headers))
+                    print("  Status code: " + str(response.status_code))
+                    print("")
 
                 return resource
 
@@ -607,11 +610,12 @@ elif LIBRARIES["requests"]:
                 headers[header] = response.headers[header]
 
             if DEBUG:
-                logger.debug("Response")
-                logger.debug("  Type: Proxy")
-                logger.debug("  Content: " + response.content.decode())
-                logger.debug("  Headers: " + str(headers))
-                logger.debug("  Status code: " + str(response.status_code))
+                print("Response")
+                print("  Type: Proxy")
+                print("  Content: " + response.content.decode())
+                print("  Headers: " + str(headers))
+                print("  Status code: " + str(response.status_code))
+                print("")
 
             return HttpResponse(response.content, status=response.status_code, headers=headers)
 
