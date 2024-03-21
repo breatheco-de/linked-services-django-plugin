@@ -23,7 +23,7 @@ def patch(db, monkeypatch):
 
 
 @pytest.mark.parametrize("user", [0, 1])
-async def test_no_first_party_credentials(patch, fake, database, user):
+def test_no_first_party_credentials(patch, fake, database, user):
     database.create(user=user)
     v = fake.slug()
     create_use_mock = patch
@@ -36,9 +36,9 @@ async def test_no_first_party_credentials(patch, fake, database, user):
     assert database.list_of("linked_services.FirstPartyCredentials") == []
 
 
-async def test_with_first_party_credentials(patch, fake, database, get_json_obj):
+def test_with_first_party_credentials(patch, fake, database, get_json_obj):
     app_slug = fake.slug()
-    model = database.acreate(
+    model = database.create(
         user=1,
         first_party_credentials={
             "app": {app_slug: 1},
