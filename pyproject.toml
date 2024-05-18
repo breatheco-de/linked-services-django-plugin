@@ -46,6 +46,7 @@ path = "src/linked_services/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
+  "pytz",
   "coverage[toml]>=6.5",
   "pytest",
   "pytest-django",
