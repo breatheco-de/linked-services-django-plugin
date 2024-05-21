@@ -68,7 +68,7 @@ class AppUserAgreementAdmin(admin.ModelAdmin):
 class FirstPartyWebhookLogAdmin(admin.ModelAdmin):
     list_display = ("id", "app", "type", "user_id", "external_id", "url", "processed", "attempts", "status")
     search_fields = ["user_id", "external_id", "url", "app__name", "app__slug"]
-    list_filter = ["app", "admin", "processed", "status"]
+    list_filter = ["app", "type", "processed", "status"]
     actions = []
 
 
