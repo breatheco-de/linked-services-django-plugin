@@ -168,6 +168,8 @@ def get_handlers(get_app_keys: GetAppKeysFn, get_user_scopes: GetUserScopesFn) -
             "app_url": app_url,
         }
 
+        payload["sub"] = int(payload["sub"]) if payload["sub"] else None
+
         return app, payload
 
     # required_scopes is really a tuple of n strings

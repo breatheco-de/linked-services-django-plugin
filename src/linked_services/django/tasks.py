@@ -12,7 +12,7 @@ from linked_services.django.service import Service
 logger = logging.getLogger(__name__)
 settings = {}
 
-if p := os.getenv("OAUTH_CREDENTIALS_PRIORITY"):
+if (p := os.getenv("OAUTH_CREDENTIALS_PRIORITY")) and p.isdigit():
     settings["priority"] = int(p)
 
 else:
