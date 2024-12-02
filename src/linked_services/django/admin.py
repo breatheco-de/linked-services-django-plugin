@@ -5,6 +5,8 @@ from .models import (
     AppOptionalScope,
     AppRequiredScope,
     AppUserAgreement,
+    FirstPartyCredentials,
+    FirstPartyWebhookLog,
     LegacyKey,
     OptionalScopeSet,
     Scope,
@@ -57,6 +59,22 @@ class OptionalScopeSetAdmin(admin.ModelAdmin):
 @admin.register(AppUserAgreement)
 class AppUserAgreementAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "app", "optional_scope_set", "agreement_version")
+    search_fields = ["user__username", "user__email", "user__first_name", "user__last_name", "app__name", "app__slug"]
+    list_filter = ["app"]
+    actions = []
+
+
+@admin.register(FirstPartyWebhookLog)
+class FirstPartyWebhookLogAdmin(admin.ModelAdmin):
+    list_display = ("id", "app", "type", "user_id", "external_id", "url", "processed", "attempts", "status")
+    search_fields = ["user_id", "external_id", "url", "app__name", "app__slug"]
+    list_filter = ["app", "type", "processed", "status"]
+    actions = []
+
+
+@admin.register(FirstPartyCredentials)
+class FirstPartyCredentialsAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "app")
     search_fields = ["user__username", "user__email", "user__first_name", "user__last_name", "app__name", "app__slug"]
     list_filter = ["app"]
     actions = []
