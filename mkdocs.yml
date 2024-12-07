@@ -6,48 +6,52 @@ repo_url: https://github.com/breatheco-de/linked-services-django-plugin
 edit_uri: ""
 
 theme:
-    name: 'material'
-    palette:
-      - scheme: 'default'
-        media: '(prefers-color-scheme: light)'
-        toggle:
-          icon: 'material/lightbulb'
-          name: "Switch to dark mode"
-      - scheme: 'slate'
-        media: '(prefers-color-scheme: dark)'
-        primary: 'blue'
-        toggle:
-          icon: 'material/lightbulb-outline'
-          name: 'Switch to light mode'
-    features:
-        - navigation.sections
+  name: "material"
+  palette:
+    - scheme: "default"
+      media: "(prefers-color-scheme: light)"
+      toggle:
+        icon: "material/lightbulb"
+        name: "Switch to dark mode"
+    - scheme: "slate"
+      media: "(prefers-color-scheme: dark)"
+      primary: "blue"
+      toggle:
+        icon: "material/lightbulb-outline"
+        name: "Switch to light mode"
+  features:
+    - navigation.sections
 
 # this define the order of menu
 nav:
-    - index.md
-    - Getting started:
+  - index.md
+  - Getting started:
       - "getting-started/installation.md"
       - "getting-started/set-up.md"
       - "getting-started/services.md"
       - "getting-started/scopes.md"
       - "getting-started/views.md"
+      - "getting-started/middlewares.md"
 
-    - Extending service:
+  - Extending service:
       - "extending-service/rest-frameworks.md"
       - "extending-service/http-clients.md"
 
-    - Extending scope and ascope:
+  - Extending scope and ascope:
       - "extending-scope/rest-frameworks.md"
 
+  - Fixtures:
+      - "fixtures/service.md"
+
 plugins:
-    - search
+  - search
 
 markdown_extensions:
-    - pymdownx.highlight:
-          anchor_linenums: true
-    - pymdownx.inlinehilite
-    - pymdownx.snippets
-    - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 
 extra_css:
-    - css/custom.css
+  - css/custom.css
