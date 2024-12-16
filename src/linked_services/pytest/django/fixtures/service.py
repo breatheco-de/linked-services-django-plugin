@@ -7,6 +7,7 @@ import pytest
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from linked_services.core.settings import get_setting
 from linked_services.rest_framework.types import LinkedApp
 
 __all__ = ["Service", "service"]
@@ -39,13 +40,14 @@ class Service:
         """
 
         now = timezone.now()
+        whoamy = get_setting("app_name")
 
         # https://datatracker.ietf.org/doc/html/rfc7519#section-4
         payload = {
             "sub": str(user_id or ""),
             "iss": os.getenv("API_URL", "http://localhost:8000"),
             "app": app.slug,
-            "aud": "breathecode",
+            "aud": whoamy,
             "exp": datetime.timestamp(now + timedelta(minutes=2)),
             "iat": datetime.timestamp(now) - 1,
             "typ": "JWT",
@@ -53,7 +55,7 @@ class Service:
 
         if reverse:
             payload["aud"] = app.slug
-            payload["app"] = "breathecode"
+            payload["app"] = whoamy
 
         if app.algorithm == "HMAC_SHA256":
 
