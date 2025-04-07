@@ -81,6 +81,7 @@ cov = ["test-cov", "cov-report"]
 docs = "mkdocs serve --livereload"
 generate_docs = "mkdocs build"
 docs_deploy = "mkdocs gh-deploy -c"
+migrations = "python src/manage.py makemigrations"
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.11", "3.12"]
